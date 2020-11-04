@@ -1,0 +1,53 @@
+#include 'tlpp-core.th'
+namespace sample.util
+
+function workareaToJsonList(cAlias as character, oPropertyRename ,ldotrim as boolean)
+    local afields := (cAlias)->(dbStruct())
+    local nx
+    local oJson := JsonObject():new()
+    local oItem
+    local cPropertyName
+    default ldotrim := .T.
+    oJson["items"] := {}
+    while((cAlias)->(!eof()))
+        oItem := JsonObject():new()
+
+        for nx :=1 to len(afields)
+            cPropertyName := oPropertyRename[afields[nx][1]]["name"]
+            if empty(cPropertyName)
+                cPropertyName := afields[nx][1]
+            endif
+            oItem[cPropertyName] := getValueJson((cAlias)->(fieldget(nx)),afields[nx][2],ldotrim)
+        next
+        aAdd(oJson["items"],oItem)
+        (cAlias)->(dbskip())
+    end
+
+return oJson
+
+static function getValueJson(xValue,cType,ldotrim)
+if cType == "C" .and. ldotrim
+    xValue := Alltrim(xValue)
+endif
+
+return xValue
+
+function workareaToJson(cAlias as character, oPropertyRename ,ldotrim as boolean)
+    local afields := (cAlias)->(dbStruct())
+    local nx    
+    local oItem
+    local cPropertyName
+    default ldotrim := .T.
+    
+    
+    oItem := JsonObject():new()
+
+    for nx :=1 to len(afields)
+        cPropertyName := oPropertyRename[afields[nx][1]]["name"]
+        if empty(cPropertyName)
+            cPropertyName := afields[nx][1]
+        endif
+        oItem[cPropertyName] := getValueJson((cAlias)->(fieldget(nx)),afields[nx][2],ldotrim)
+    next
+            
+return oItem

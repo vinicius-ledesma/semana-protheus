@@ -1,0 +1,29 @@
+#include "tlpp-core.th"
+namespace sample.receivable
+
+using namespace sample.util
+
+@get("/api/sample/receivable/")
+function getReceivable()
+    local oService := ReceivableService():getInstance()    
+    local jResposta
+    jResposta := oService:getReceivable()
+    AnswerRest(jResposta)
+return
+
+@get("/api/sample/receivable/pending")
+function getPendingReceivable()
+    local oService := ReceivableService():getInstance()    
+    local jResposta
+    jResposta := oService:getPendingReceivable()
+    AnswerRest(jResposta)
+return
+
+@get("/api/sample/receivable/overdue")
+function getOverdueReceivable()
+    local oService := ReceivableService():getInstance()    
+    local jResposta
+    jResposta := oService:getOverdueReceivable()
+    AnswerRest(jResposta)
+return
+

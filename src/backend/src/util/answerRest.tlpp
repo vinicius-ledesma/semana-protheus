@@ -1,0 +1,27 @@
+namespace sample.util
+//-------------------------------------------------------------------
+/*/{Protheus.doc} AnswerRest
+Envio o resultado de sucesso ou falha para o serviço rest,
+fazendo ja o tratamento do statusCode
+@param jServiceResponse Objeto json com os seguintes atributos:
+    - {
+        "result" : .T.  ou .F.
+        ,"result" : String com valor a retornar ou a msg de erro
+        "status-code": Codigo http caso se queira mudar o default (200 pra .t., 500 para .f. o result)
+
+    }
+@author  rodrigo.antonio
+/*/
+//-------------------------------------------------------------------
+function AnswerRest(jServiceResponse) 
+
+    if (jServiceResponse["result"])    
+        oRest:setResponse(jServiceResponse["response"]) 
+    else
+        oRest:setFault(jServiceResponse["result"])
+    endif
+    if (jServiceResponse["status-code"] != Nil) 
+        oRest:setStatusCode(jServiceResponse["status-code"] )
+    endif
+
+return

@@ -1,0 +1,25 @@
+#include 'tlpp-core.th'
+namespace sample.receivable
+
+static __instance as object
+static __dataProvider := "protheus"
+static __oActiveData
+
+class ReceivableDataFactory
+    public method new()    
+    static method getData() as object
+endclass
+
+method new() class ReceivableDataFactory
+return
+method getData() class ReceivableDataFactory
+    if __oActiveData == Nil
+        if __dataProvider == "protheus"
+            __oActiveData := ReceivableProtheusData():new()
+        elseif __dataProvider == "mongo"
+            __oActiveData := ReceivableMongo():new()
+        else
+            UserException("Invalid Provider")
+        endif
+    endif
+return __oActiveData

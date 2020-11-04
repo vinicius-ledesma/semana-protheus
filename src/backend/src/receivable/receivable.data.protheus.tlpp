@@ -1,0 +1,121 @@
+#include "tlpp-core.th"
+namespace sample.receivable
+
+using namespace sample.util
+
+static __oHashPrepareCache := FWHashMap():New()
+static __oHDataStruct
+
+class ReceivableProtheusData
+    public method new()
+    public method getReceivable()
+    public method getPendingReceivable()
+    public method getOverdueReceivable()
+endclass
+
+method new() class ReceivableProtheusData
+    if(__oHDataStruct == nil)
+        initDataStruct()
+    endif
+return
+
+method getReceivable() class ReceivableProtheusData
+    local oPrepare
+    local cAlias := getNextAlias()
+    local jRet
+    if !__oHashPrepareCache:containsKey("getReceivable")
+        oPrepare := createPrepareGetReceivable()
+    else
+        oPrepare := __oHashPrepareCache:get("getReceivable")
+    endif
+    DbUseArea(.t.,"TOPCONN",TcGenQry(,,oPrepare:getFixQuery()),cAlias)    
+    jRet := workareaToJsonList(cAlias, __oHDataStruct )
+    (cAlias)->(DBCloseArea())
+return jRet
+
+method getPendingReceivable() class ReceivableProtheusData
+    local oPrepare
+    local cAlias := getNextAlias()
+    local jRet
+    if !__oHashPrepareCache:containsKey("getPendingReceivable")
+        oPrepare := createPrepareGetPendingReceivable()
+    else
+        oPrepare := __oHashPrepareCache:get("getPendingReceivable")
+    endif
+    DbUseArea(.t.,"TOPCONN",TcGenQry(,,oPrepare:getFixQuery()),cAlias)    
+    jRet := workareaToJsonList(cAlias, __oHDataStruct )
+    (cAlias)->(DBCloseArea())
+return jRet
+
+method getOverdueReceivable() class ReceivableProtheusData
+    local oPrepare
+    local cAlias := getNextAlias()
+    local jRet
+    if !__oHashPrepareCache:containsKey("getOverdueReceivable")
+        oPrepare := createPrepareGetOverdueReceivable()
+    else
+        oPrepare := __oHashPrepareCache:get("getOverdueReceivable")
+    endif
+    DbUseArea(.t.,"TOPCONN",TcGenQry(,,oPrepare:getFixQuery()),cAlias)    
+    jRet := workareaToJsonList(cAlias, __oHDataStruct )
+    (cAlias)->(DBCloseArea())
+return jRet
+
+static function createPrepareGetReceivable()
+    local oPrepare
+    local cQuery := "SELECT SA1.A1_EST ESTADO, COUNT(SA1.A1_EST) QUANTIDADE, SUM(SE1.E1_VALOR) TOTAL FROM " + retSqlName("SE1") + " SE1 "
+	        cQuery += "INNER JOIN " + retSqlName("SA1") + " SA1 ON SA1.A1_COD+SA1.A1_LOJA = SE1.E1_CLIENTE+SE1.E1_LOJA "
+		        cQuery += "AND SA1.D_E_L_E_T_ = ' ' "
+	        cQuery += "WHERE SE1.D_E_L_E_T_ = ' ' "
+		        cQuery += "AND E1_BAIXA <> '' "
+		        cQuery += "AND E1_SALDO = 0 "
+		    cQuery += "GROUP BY SA1.A1_EST "
+		    cQuery += "ORDER BY TOTAL DESC "
+    cQuery := ChangeQuery(cQuery)
+    oPrepare := FWPreparedStatement():New(cQuery)
+    __oHashPrepareCache:put("getReceivable",oPrepare )
+return oPrepare
+
+static function createPrepareGetPendingReceivable()
+    local oPrepare
+    local cQuery := "SELECT SA1.A1_EST ESTADO, COUNT(SA1.A1_EST) QUANTIDADE, SUM(SE1.E1_VALOR) TOTAL FROM " + retSqlName("SE1") + " SE1 "
+	        cQuery += "INNER JOIN " + retSqlName("SA1") + " SA1 ON SA1.A1_COD+SA1.A1_LOJA = SE1.E1_CLIENTE+SE1.E1_LOJA "
+		        cQuery += "AND SA1.D_E_L_E_T_ = ' ' "
+	        cQuery += "WHERE SE1.D_E_L_E_T_ = ' ' "
+		        cQuery += "AND E1_BAIXA = '' "
+		        cQuery += "AND E1_SALDO > 0 "
+		    cQuery += "GROUP BY SA1.A1_EST "
+		    cQuery += "ORDER BY TOTAL DESC "
+    cQuery := ChangeQuery(cQuery)
+    oPrepare := FWPreparedStatement():New(cQuery)
+    __oHashPrepareCache:put("getPendingReceivable",oPrepare )
+return oPrepare
+
+static function createPrepareGetOverdueReceivable()
+    local oPrepare
+    local cQuery := "SELECT COUNT(*) BAIXADOS, COUNT(CASE WHEN ATRASO > 0 THEN 1 ELSE NULL END) ATRASADOS FROM "
+	            cQuery += "(SELECT E1_VENCREA VENCIMENTO, E1_BAIXA BAIXA, DATEDIFF(day, E1_VENCREA, E1_BAIXA) ATRASO FROM " + retSqlName("SE1") + " "
+	            cQuery += "WHERE E1_BAIXA <> '' "
+	                cQuery += "AND E1_SALDO = 0 "
+	                cQuery += "AND D_E_L_E_T_ = ' ') AS SE1 "
+    cQuery := ChangeQuery(cQuery)
+    oPrepare := FWPreparedStatement():New(cQuery)
+    __oHashPrepareCache:put("getOverdueReceivable",oPrepare )
+return oPrepare
+
+static function initDataStruct()
+    __oHDataStruct := JsonObject():New()
+    __oHDataStruct["ESTADO"] := createTableField("location","C",2,0)
+    __oHDataStruct["QUANTIDADE"] := createTableField("quantity","N",9,0)
+    __oHDataStruct["TOTAL"] := createTableField("total","N",15,2)
+    __oHDataStruct["BAIXADOS"] := createTableField("writtenOff","N",9,0)
+    __oHDataStruct["ATRASADOS"] := createTableField("overdue","N",9,0)
+return
+
+static function createTableField(cField,cType,nWidth,nDecimal)
+    local jField := JsonObject():New()
+    jField["name"] := cField
+    jField["type"] := cType
+    jField["width"] := nWidth
+    jField["decimal"] := nDecimal
+return jField

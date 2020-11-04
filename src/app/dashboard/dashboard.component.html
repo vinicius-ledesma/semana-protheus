@@ -1,0 +1,59 @@
+<div class="po-row">
+  <div class="po-lg-6">
+    <po-chart
+      class="po-lg-12 po-mt-2"
+      p-title="De todos os títulos baixados,"
+      [p-height]="150"
+      [p-series]="overdue"
+      [p-type]="overdueChartType"
+    >
+    </po-chart>
+
+    <po-chart
+      class="po-lg-12 po-mt-2"
+      p-title="Top 5 estados com menor valor em títulos em aberto..."
+      [p-series]="pending"
+      (p-series-click)="searchMore($event)"
+    >
+    </po-chart>
+  </div>
+
+  <div class="po-lg-6">
+    <div class="po-row">
+      <po-chart
+        class="po-lg-12 po-mt-2"
+        [p-height]="500"
+        p-title="Proporção de títulos baixados entre os estados."
+        [p-series]="writtenOff"
+        [p-type]="writtenOffChartType"
+        (p-series-click)="showMeTheDates($event)"
+      >
+      </po-chart>
+
+      <po-widget class="po-lg-6 po-mt-2" p-height="200">
+        <div class="po-font-title po-text-center po-pt-5">
+          {{ topState }} com quase
+        </div>
+        <div class="po-font-title po-text-center">{{ totalValue }}</div>
+        <div class="po-text-center">em títulos baixados.</div>
+      </po-widget>
+
+      <po-widget class="po-lg-6 po-mt-2" p-height="200">
+        <div class="po-font-title po-text-center po-pt-5">
+          Mais {{ moreStates }}
+        </div>
+        <div class="po-text-center">estados com títulos em aberto.</div>
+      </po-widget>
+    </div>
+  </div>
+</div>
+
+<div class="po-row">
+  <po-container class="po-lg-12 po-mt-2">
+    <div class="po-font-text-bold">
+      Lista completa de títulos em aberto por estado.
+    </div>
+
+    <po-table p-container="shadow" [p-items]="items"> </po-table>
+  </po-container>
+</div>

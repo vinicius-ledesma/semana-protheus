@@ -1,0 +1,54 @@
+#include 'tlpp-core.th'
+namespace sample.receivable
+
+static __instance as object
+
+class ReceivableService
+    public method new()
+    public method getReceivable()
+    public method getPendingReceivable()
+    public method getOverdueReceivable()
+    static method getInstance() as object    
+endclass
+
+method new() class ReceivableService
+return
+
+method getInstance() class ReceivableService
+    If (__instance == nil)
+        __instance := ReceivableService():new()
+    endif
+return __instance
+
+method getReceivable() class ReceivableService
+local odata := ReceivableDataFactory():getData()
+local xret
+local jResponse := JsonObject():new()
+    
+    xret := oData:getReceivable()
+
+jResponse["result"] := .t.
+jResponse["response"] := xRet
+return jResponse
+
+method getPendingReceivable() class ReceivableService
+local odata := ReceivableDataFactory():getData()
+local xret
+local jResponse := JsonObject():new()
+    
+    xret := oData:getPendingReceivable()
+
+jResponse["result"] := .t.
+jResponse["response"] := xRet
+return jResponse
+
+method getOverdueReceivable() class ReceivableService
+local odata := ReceivableDataFactory():getData()
+local xret
+local jResponse := JsonObject():new()
+    
+    xret := oData:getOverdueReceivable()
+
+jResponse["result"] := .t.
+jResponse["response"] := xRet
+return jResponse
